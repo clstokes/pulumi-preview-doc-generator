@@ -25,28 +25,36 @@ const previewData = JSON.parse(inputFile);
 const outputFile = fs.createWriteStream(argv.out);
 
 // Create output
+const outputCategories: { [key: string]: string[] } = {};
 const steps: any[] = previewData["steps"];
 
 for (let step of steps) {
-    const { resourceUrn, resourceType, resourceName } = utils.parseResource(step);
+    const { resourceUrn, resourcePackage, resourceType, resourceName } = utils.parseResource(step);
     if (
-        resourceType.endsWith(":dynamic:Resource")
+        resourceType.startsWith("pulumi")
         || resourceType.startsWith("awsx")
+        || resourceType.endsWith(":dynamic:Resource")
         || step["newState"]["custom"] === false
     ) {
         continue
     }
 
     let markdownOutput = ``
-    markdownOutput += `### \`${resourceType} - ${resourceName}\`` + "\n\n";
+    markdownOutput += `#### \`${resourceType} - ${resourceName}\`` + "\n\n";
+    
+    markdownOutput += `|     | Resource Details |` + "\n";
+    markdownOutput += `| --- | --- |` + "\n";
+    markdownOutput += `| URN | \`${resourceUrn}\` |` + "\n";
+    markdownOutput += `| Type | \`${resourceType}\` |` + "\n";
+    markdownOutput += `| Name | \`${resourceName}\` |` + "\n";
 
-    markdownOutput += `URN: \`${resourceUrn}\`` + "\n\n";
-    markdownOutput += `Type: \`${resourceType}\`` + "\n\n";
-    markdownOutput += `Name: \`${resourceName}\`` + "\n\n";
+    markdownOutput += "\n\n";
 
     const stepInputs = step["newState"]["inputs"];
 
     if (stepInputs) {
+        // markdownOutput += `##### Inputs` + "\n\n";
+
         markdownOutput += `| Input Name | Input Value |` + "\n";
         markdownOutput += `| ---------- | ----------- |` + "\n";
 
@@ -71,8 +79,32 @@ for (let step of steps) {
         }
     }
     markdownOutput += "\n";
-    outputFile.write(markdownOutput, "utf-8");
+
+    if (outputCategories[resourcePackage] === undefined) {
+        outputCategories[resourcePackage] = [];
+    }
+    outputCategories[resourcePackage].push(markdownOutput);
 }
+
+let resourceToc = "";
+resourceToc += `# Resources` + "\n\n";
+
+let totalResourceMarkdown = ""
+
+for (let [categoryKey, resources] of Object.entries(outputCategories)) {
+    resourceToc += `- [${categoryKey}](#${categoryKey.replace(/:/g, "")})` + "\n";
+
+    totalResourceMarkdown += `## ${categoryKey}` + "\n\n";
+    for (let resourceMarkdown of resources) {
+        totalResourceMarkdown += resourceMarkdown;
+        totalResourceMarkdown += "---" + "\n\n";
+    }
+}
+
+resourceToc += "\n\n";
+
+outputFile.write(resourceToc, "utf-8");
+outputFile.write(totalResourceMarkdown, "utf-8");
 
 console.log(`number of steps: ${steps.length} `);
 outputFile.end();
