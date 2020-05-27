@@ -40,23 +40,20 @@ for (let step of steps) {
     }
 
     let markdownOutput = ``
-    markdownOutput += `#### \`${resourceType} - ${resourceName}\`` + "\n\n";
-    
+    markdownOutput += `#### \`${resourceName}\`` + "\n\n";
+
     markdownOutput += `|     | Resource Details |` + "\n";
     markdownOutput += `| --- | --- |` + "\n";
-    markdownOutput += `| URN | \`${resourceUrn}\` |` + "\n";
     markdownOutput += `| Type | \`${resourceType}\` |` + "\n";
     markdownOutput += `| Name | \`${resourceName}\` |` + "\n";
 
-    markdownOutput += "\n\n";
+    // markdownOutput += "\n\n";
 
     const stepInputs = step["newState"]["inputs"];
 
     if (stepInputs) {
-        // markdownOutput += `##### Inputs` + "\n\n";
-
-        markdownOutput += `| Input Name | Input Value |` + "\n";
-        markdownOutput += `| ---------- | ----------- |` + "\n";
+        markdownOutput += `| **Input Name** | **Input Value** |` + "\n";
+        // markdownOutput += `| ---------- | ----------- |` + "\n";
 
         for (let [inputKey, inputValue] of Object.entries(stepInputs)) {
 
@@ -80,10 +77,10 @@ for (let step of steps) {
     }
     markdownOutput += "\n";
 
-    if (outputCategories[resourcePackage] === undefined) {
-        outputCategories[resourcePackage] = [];
+    if (outputCategories[resourceType] === undefined) {
+        outputCategories[resourceType] = [];
     }
-    outputCategories[resourcePackage].push(markdownOutput);
+    outputCategories[resourceType].push(markdownOutput);
 }
 
 let resourceToc = "";
@@ -91,8 +88,12 @@ resourceToc += `# Resources` + "\n\n";
 
 let totalResourceMarkdown = ""
 
-for (let [categoryKey, resources] of Object.entries(outputCategories)) {
-    resourceToc += `- [${categoryKey}](#${categoryKey.replace(/:/g, "")})` + "\n";
+const sortedCategoryKeys = Object.keys(outputCategories).sort();
+for (let categoryKey of sortedCategoryKeys) {
+    const resources = outputCategories[categoryKey];
+
+    // Add ToC link
+    resourceToc += `- [${categoryKey}](#${categoryKey.replace(/[:\/]/g, "")})` + "\n";
 
     totalResourceMarkdown += `## ${categoryKey}` + "\n\n";
     for (let resourceMarkdown of resources) {
@@ -106,5 +107,4 @@ resourceToc += "\n\n";
 outputFile.write(resourceToc, "utf-8");
 outputFile.write(totalResourceMarkdown, "utf-8");
 
-console.log(`number of steps: ${steps.length} `);
 outputFile.end();
