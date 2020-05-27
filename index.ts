@@ -40,21 +40,17 @@ for (let step of steps) {
     }
 
     let markdownOutput = ``
-    markdownOutput += `#### \`${resourceName}\`` + "\n\n";
+    markdownOutput += `### ${resourceName}` + "\n\n";
 
     markdownOutput += `|     | Resource Details |` + "\n";
     markdownOutput += `| --- | --- |` + "\n";
     markdownOutput += `| Type | \`${resourceType}\` |` + "\n";
     markdownOutput += `| Name | \`${resourceName}\` |` + "\n";
 
-    // markdownOutput += "\n\n";
+    markdownOutput += `| **Input Name** | **Input Value** |` + "\n";
 
     const stepInputs = step["newState"]["inputs"];
-
     if (stepInputs) {
-        markdownOutput += `| **Input Name** | **Input Value** |` + "\n";
-        // markdownOutput += `| ---------- | ----------- |` + "\n";
-
         for (let [inputKey, inputValue] of Object.entries(stepInputs)) {
 
             if (inputKey === "__defaults") {
@@ -74,6 +70,9 @@ for (let step of steps) {
             }
             markdownOutput += `| ${inputKey} | \`${inputValueString}\` |` + "\n";
         }
+    }
+    else {
+        markdownOutput += `| _None_ |  |` + "\n";
     }
     markdownOutput += "\n";
 
@@ -98,7 +97,6 @@ for (let categoryKey of sortedCategoryKeys) {
     totalResourceMarkdown += `## ${categoryKey}` + "\n\n";
     for (let resourceMarkdown of resources) {
         totalResourceMarkdown += resourceMarkdown;
-        totalResourceMarkdown += "---" + "\n\n";
     }
 }
 
