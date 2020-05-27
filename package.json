@@ -1,0 +1,19 @@
+{
+  "name": "pulumi-doc-generator",
+  "version": "1.0.0",
+  "description": "Generate a Markdown doc from a `pulumi preview --json`",
+  "main": "index.js",
+  "author": "",
+  "license": "ISC",
+  "scripts": {
+    "start": "tsc -p . && node bin/index.js"
+  },
+  "devDependencies": {
+    "typescript": "^3.9.3"
+  },
+  "dependencies": {
+    "@types/node": "^14.0.5",
+    "@types/yargs": "^15.0.5",
+    "yargs": "^15.3.1"
+  }
+}
